@@ -20,6 +20,12 @@ const routes = [
     path: '/trip-generator',
     name: 'TripGenerator',
     component: () => import(/* webpackChunkName: "about" */ '../views/TripGeneratorPage.vue')
+  },
+  // 新增报表页路由
+  {
+    path: '/report',
+    name: 'ReportPage',
+    component: () => import(/* webpackChunkName: "about" */ '../views/ReportPage.vue')
   }
 ]
 

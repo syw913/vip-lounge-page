@@ -1,0 +1,36 @@
+# Vue2 项目 Netlify 配置
+# 适配 Vue2 打包、解决 history 路由刷新 404、预留 API 代理
+[build]
+  # Vue2 标准构建命令（npm/yarn 二选一，Netlify 会自动识别）
+  command = "npm run build"
+  # Vue2 打包后默认输出目录是 dist，必须和你项目的 vue.config.js 一致
+  publish = "dist"
+
+# 核心：解决 Vue2 history 路由模式下刷新页面 404
+[[redirects]]
+  from = "/*"          # 匹配所有访问路径
+  to = "/index.html"   # 全部重定向到 index.html（让 Vue 路由接管）
+  status = 200         # 200 状态码保证页面正常加载
+
+# 预留 API 代理配置（后续有后台调用时，只需替换【你的后端API域名】即可）
+[[redirects]]
+  from = "/api/*"
+  to = "【你的后端API域名】/api/:splat"
+  status = 200
+  force = true
+  headers = {
+    "Access-Control-Allow-Origin" = "*",
+    "Access-Control-Allow-Methods" = "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers" = "Content-Type, Authorization"
+  }
+
+# 预留 OPTIONS 预检请求配置（后续 API 跨域用）
+[[redirects]]
+  from = "/api/*"
+  to = "【你的后端API域名】/api/:splat"
+  method = "OPTIONS"
+  status = 200
+  headers = {
+    "Access-Control-Allow-Headers" = "Content-Type, Authorization",
+    "Access-Control-Max-Age" = "86400"
+  }

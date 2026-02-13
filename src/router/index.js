@@ -36,3 +36,17 @@ export default router
 // git add .
 // git commit -m "更新：修改二维码样式"
 // git push
+// 第三步：Vercel 一键部署（永久免费）
+// 1. 登录 Vercel
+// 打开：https://vercel.com → 点击 Sign Up → 用 GitHub 账号登录（授权即可）。
+// 2. 导入项目
+// 登录后点击 New Project → Import Git Repository
+// 找到你刚上传的仓库（比如 vip-lounge-page）→ 点击 Import
+// 配置部署参数（自动识别，不用改）：
+// Framework Preset：自动选 Vue.js
+// Root Directory：留空
+// Build Command：自动填充 npm run build
+// Output Directory：自动填充 dist
+// 点击 Deploy，等待 30 秒左右，部署完成！
+// 3. 获取永久访问链接
+// 部署完成后，Vercel 会生成一个域名，格式如下：

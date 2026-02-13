@@ -33,3 +33,6 @@ const router = new VueRouter({
 
 export default router
 // npm run lint -- --fix
+// git add .
+// git commit -m "更新：修改二维码样式"
+// git push

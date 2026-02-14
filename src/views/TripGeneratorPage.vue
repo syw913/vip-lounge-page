@@ -87,7 +87,7 @@
         />
       </el-form-item>
 
-      <!-- 按钮区域：生成 + 删除 -->
+      <!-- 按钮：生成链接 + 新增重置/返回报表页 -->
       <el-form-item>
         <el-button type="primary" @click="generateLink" :loading="generating" :disabled="!generatedQrcodeUrl">
           <i class="el-icon-link" /> 生成链接
@@ -123,19 +123,8 @@
 </template>
 
 <script>
-// 引入二维码解析库和生成库
 import jsQR from 'jsqr'
 import QRCode from 'qrcode'
-// 假设项目中已安装并配置axios（如未安装：npm install axios）
-import axios from 'axios'
-
-// 配置接口基础地址（请替换为你的实际接口域名）
-// const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'https://your-api-domain.com/api'
-
-// 修改为（本地开发）
-const API_BASE_URL = 'http://localhost:3000' // 去掉/api，因为接口路径已经包含/api
-// 或（生产环境，如部署到服务器）
-// const API_BASE_URL = 'http://你的服务器IP:3000';
 
 export default {
   name: 'TripGeneratorPage',
@@ -147,9 +136,9 @@ export default {
         companionCount: 1,
         date: '2026/02/11'
       },
-      previewUrl: '', // 原始图片预览地址
-      generatedQrcodeUrl: '', // 生成的纯二维码Base64地址
-      qrcodeResult: '', // 解析出的二维码文本内容
+      previewUrl: '',
+      generatedQrcodeUrl: '',
+      qrcodeResult: '',
       generating: false,
       generatedLink: '',
       originalFileBase64: '',
@@ -157,7 +146,6 @@ export default {
     }
   },
   methods: {
-    // 触发文件选择框
     triggerUpload () {
       this.$refs.fileInput.click()
     },
@@ -248,86 +236,44 @@ export default {
       this.generatedQrcodeBase64 = ''
       this.$message.info('图片已清空！')
     },
-
-    // 生成用户信息（存储生成的纯二维码）
-    generateUserId () {
-      // 1. 基础校验
+    // 生成链接（替代原 generateUserId）
+    generateLink () {
       if (!this.form.name || !this.form.date) {
         this.$message.warning('请完善姓名和日期信息！')
         return
       }
       if (!this.generatedQrcodeBase64) {
-        this.$message.warning('请先上传包含二维码的图片并完成解析生成！')
+        this.$message.warning('请先上传包含二维码的图片并完成解析！')
         return
       }
-
       this.generating = true
-
-      // 2. 模拟接口请求
       setTimeout(() => {
         try {
-          // 生成唯一userId
           const newUserId = 'USER_' + Date.now() + '_' + Math.floor(Math.random() * 1000)
-
-          // 3. 组装用户信息（核心存储生成的纯二维码）
           const userInfo = {
             userId: newUserId,
             name: this.form.name,
             companionCount: this.form.companionCount,
             date: this.form.date,
-            qrcodeContent: this.qrcodeResult, // 二维码文本内容
-            generatedQrcodeBase64: this.generatedQrcodeBase64, // 生成的纯二维码Base64
+            qrcodeContent: this.qrcodeResult,
+            generatedQrcodeBase64: this.generatedQrcodeBase64,
             createTime: new Date().toLocaleString()
           }
-
-          // 4. 存储到localStorage
           const existingData = JSON.parse(localStorage.getItem('userTripData') || '[]')
           const uniqueData = existingData.filter(item => item.userId !== newUserId)
           uniqueData.push(userInfo)
           localStorage.setItem('userTripData', JSON.stringify(uniqueData))
-
-          // 5. 反显数据
           this.form.userId = newUserId
           const domain = window.location.origin
           this.generatedLink = `${domain}/#/vip-loungePage?userId=${newUserId}`
-
-          this.$message.success(`用户信息生成成功！
-ID：${newUserId}
-纯二维码已同步存储`)
+          this.$message.success('链接生成成功！可点击复制使用')
         } catch (err) {
-          this.$message.error('用户信息存储失败：' + err.message)
+          this.$message.error('链接生成失败：' + err.message)
         } finally {
           this.generating = false
         }
       }, 1000)
     },
-
-    // 删除用户信息
-    deleteUserInfo () {
-      if (!this.form.userId) {
-        this.$message.warning('请输入要删除的用户ID！')
-        return
-      }
-
-      try {
-        const existingData = JSON.parse(localStorage.getItem('userTripData') || '[]')
-        const newData = existingData.filter(item => item.userId !== this.form.userId)
-
-        if (existingData.length === newData.length) {
-          this.$message.error('未找到该用户ID，删除失败！')
-          return
-        }
-
-        localStorage.setItem('userTripData', JSON.stringify(newData))
-        this.form.userId = ''
-        this.generatedLink = ''
-        this.$message.success('用户信息（含二维码）已成功删除！')
-      } catch (err) {
-        this.$message.error('删除失败：' + err.message)
-      }
-    },
-
-    // 复制链接
     copyLink () {
       if (!this.generatedLink) return
       if (navigator.clipboard) {
@@ -354,9 +300,52 @@ ID：${newUserId}
       } finally {
         document.body.removeChild(textArea)
       }
+    },
+    // 新增：重置所有表单和数据
+    resetAll () {
+      // 重置表单字段
+      this.form = {
+        userId: '',
+        name: '',
+        companionCount: 1,
+        date: '2026/02/11'
+      }
+      // 重置图片和二维码相关数据
+      this.previewUrl = ''
+      this.generatedQrcodeUrl = ''
+      this.qrcodeResult = ''
+      this.originalFileBase64 = ''
+      this.generatedQrcodeBase64 = ''
+      // 重置生成的链接
+      this.generatedLink = ''
+      this.generating = false
+      // 释放图片URL
+      if (this.previewUrl) {
+        URL.revokeObjectURL(this.previewUrl)
+      }
+      this.$message.success('已重置所有内容！')
+    },
+    // 新增：返回报表页
+    backToReport () {
+      // 确认是否返回（可选，提升用户体验）
+      this.$confirm('确定要返回报表页吗？未保存的内容将不会丢失', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info'
+      }).then(() => {
+        // 跳转到报表页（请根据实际路由路径修改）
+        if (this.$router) {
+          this.$router.push('/report') // 假设报表页路由为 /report
+        } else {
+          // 无路由时的降级处理（跳转到当前域名下的report.html）
+          window.location.href = `${window.location.origin}/report.html`
+        }
+        this.$message.success('已返回报表页！')
+      }).catch(() => {
+        this.$message.info('已取消返回操作')
+      })
     }
   },
-  // 页面销毁时释放URL
   beforeDestroy () {
     if (this.previewUrl) URL.revokeObjectURL(this.previewUrl)
   }

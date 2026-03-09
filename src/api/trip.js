@@ -1,7 +1,10 @@
 import axios from 'axios'
-
+// 在你的 axios 配置中添加
+axios.defaults.headers.common['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+axios.defaults.headers.common['Pragma'] = 'no-cache';
 // 后端接口地址（本地开发）
-const baseURL = 'http://localhost:3000/api/trip'
+// const baseURL = 'http://localhost:3000/api/trip'
+const baseURL = 'https://hymenopterous-nondispersive-lexi.ngrok-free.dev/api/trip'
 
 // 新增行程
 export function saveTrip (data) {

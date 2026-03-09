@@ -125,6 +125,7 @@
 <script>
 import jsQR from 'jsqr'
 import QRCode from 'qrcode'
+import { saveTrip } from '@/api/trip';
 
 export default {
   name: 'TripGeneratorPage',
@@ -134,7 +135,7 @@ export default {
         userId: '', // 保留字段，仅隐藏
         name: '',
         companionCount: 1,
-        date: '2026/02/11'
+        date: ''
       },
       previewUrl: '',
       generatedQrcodeUrl: '',
@@ -237,7 +238,7 @@ export default {
       this.$message.info('图片已清空！')
     },
     // 生成链接（替代原 generateUserId）
-    generateLink () {
+    async generateLink () {
       if (!this.form.name || !this.form.date) {
         this.$message.warning('请完善姓名和日期信息！')
         return
@@ -247,32 +248,54 @@ export default {
         return
       }
       this.generating = true
-      setTimeout(() => {
-        try {
-          const newUserId = 'USER_' + Date.now() + '_' + Math.floor(Math.random() * 1000)
-          const userInfo = {
-            userId: newUserId,
-            name: this.form.name,
-            companionCount: this.form.companionCount,
-            date: this.form.date,
-            qrcodeContent: this.qrcodeResult,
-            generatedQrcodeBase64: this.generatedQrcodeBase64,
-            createTime: new Date().toLocaleString()
-          }
-          const existingData = JSON.parse(localStorage.getItem('userTripData') || '[]')
-          const uniqueData = existingData.filter(item => item.userId !== newUserId)
-          uniqueData.push(userInfo)
-          localStorage.setItem('userTripData', JSON.stringify(uniqueData))
-          this.form.userId = newUserId
-          const domain = window.location.origin
-          this.generatedLink = `${domain}/#/vip-loungePage?userId=${newUserId}`
-          this.$message.success('链接生成成功！可点击复制使用')
-        } catch (err) {
-          this.$message.error('链接生成失败：' + err.message)
-        } finally {
-          this.generating = false
+      // setTimeout(() => {
+      //   try {
+      //     const newUserId = 'USER_' + Date.now() + '_' + Math.floor(Math.random() * 1000)
+      //     const userInfo = {
+      //       userId: newUserId,
+      //       name: this.form.name,
+      //       companionCount: this.form.companionCount,
+      //       date: this.form.date,
+      //       qrcodeContent: this.qrcodeResult,
+      //       generatedQrcodeBase64: this.generatedQrcodeBase64,
+      //       createTime: new Date().toLocaleString()
+      //     }
+      //     const existingData = JSON.parse(localStorage.getItem('userTripData') || '[]')
+      //     const uniqueData = existingData.filter(item => item.userId !== newUserId)
+      //     uniqueData.push(userInfo)
+      //     localStorage.setItem('userTripData', JSON.stringify(uniqueData))
+      //     this.form.userId = newUserId
+      //     const domain = window.location.origin
+      //     this.generatedLink = `${domain}/#/vip-loungePage?userId=${newUserId}`
+      //     this.$message.success('链接生成成功！可点击复制使用')
+      //   } catch (err) {
+      //     this.$message.error('链接生成失败：' + err.message)
+      //   } finally {
+      //     this.generating = false
+      //   }
+      // }, 1000)
+      try {
+        // 调用后端接口保存数据
+        const res = await saveTrip({
+          name: this.form.name,
+          companionCount: this.form.companionCount,
+          date: this.form.date,
+          qrcodeContent: this.qrcodeResult,
+          generatedQrcodeBase64: this.generatedQrcodeBase64
+        });
+
+        if (res.data.code === 200) {
+          // 生成带tripId的链接
+          this.generatedLink = `${window.location.origin}/#/vip-loungePage?tripId=${res.data.data.tripId}`;
+          this.form.userId = res.data.data.tripId
+          this.$message.success('链接生成成功！');
         }
-      }, 1000)
+      } catch (err) {
+        console.error('保存失败：', err);
+        this.$message.error('链接生成失败，请重试！');
+      }finally {
+        this.generating = false
+      }
     },
     copyLink () {
       if (!this.generatedLink) return
@@ -392,7 +415,7 @@ export default {
   transition: all 0.3s;
   text-align: left;
   margin: 0;
-  width: 100%;
+  /* width: 100%; */
   max-width: 400px;
 }
 .upload-area:hover {

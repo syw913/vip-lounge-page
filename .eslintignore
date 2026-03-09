@@ -1,0 +1,12 @@
+# 忽略 Vue 编译后的文件
+node_modules/
+dist/
+build/
+coverage/
+*.min.js
+# 忽略 Vue 单文件组件的编译产物（关键）
+**/node_modules/**
+**/dist/**
+**/build/**
+# 若有其他自动生成的目录/文件，也添加进来
+src/assets/js/auto-generated/

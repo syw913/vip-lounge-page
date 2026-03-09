@@ -1,106 +1,112 @@
 <template>
   <div class="vip-page">
-    <!-- 顶部服务提供方 -->
-    <div class="header-provider">
-      <div class="provider-left">
-        <img src="./../assets/logo.jpg" alt="悦途出行" class="logo" />
-        <div class="provider-left-text">{{ langText.providerLeftText }}</div>
+    <template v-if="info.status!==1">
+      <div>链接失效</div>
+    </template>
+    <template v-else>
+      <!-- 顶部服务提供方 -->
+      <div class="header-provider">
+        <div class="provider-left">
+          <img src="./../assets/logo.jpg" alt="悦途出行" class="logo" />
+          <div class="provider-left-text">{{ langText.providerLeftText }}</div>
+        </div>
+        <div class="lang-switch">
+          <span class="lang-item" :class="{ active: activeLang === 'ENG' }" @click="switchLang('ENG')">
+            ENG
+          </span>
+          <span class="lang-item" :class="{ active: activeLang === 'CN' }" @click="switchLang('CN')">
+            中文
+          </span>
+        </div>
       </div>
-      <div class="lang-switch">
-        <span class="lang-item" :class="{ active: activeLang === 'ENG' }" @click="switchLang('ENG')">
-          ENG
-        </span>
-        <span class="lang-item" :class="{ active: activeLang === 'CN' }" @click="switchLang('CN')">
-          中文
-        </span>
-      </div>
-    </div>
 
-    <!-- 多语言标题 -->
-    <h1 class="page-title">{{ langText.pageTitle }}</h1>
-    <p class="member-count">{{ langText.memberCount }}</p>
+      <!-- 多语言标题 -->
+      <h1 class="page-title">{{ langText.pageTitle }}</h1>
+      <p class="member-count">{{ langText.memberCount }}</p>
 
-    <!-- 二维码展示区域（仅保留闪一下动画） -->
-    <div class="qrcode-container">
-      <div v-if="qrcodeUrl" class="qrcode-box">
-        <!-- 核心：通过key强制刷新 + 闪烁动画 -->
-        <img
-          :src="qrcodeUrl"
-          :key="refreshTimestamp"
-          alt="贵宾室二维码"
-          class="qrcode-img"
-          :class="{ 'qr-flash': isRefreshing }"
-        />
+      <!-- 二维码展示区域（仅保留闪一下动画） -->
+      <div class="qrcode-container">
+        <div v-if="qrcodeUrl" class="qrcode-box">
+          <!-- 核心：通过key强制刷新 + 闪烁动画 -->
+          <img
+            :src="qrcodeUrl"
+            :key="refreshTimestamp"
+            alt="贵宾室二维码"
+            class="qrcode-img"
+            :class="{ 'qr-flash': isRefreshing }"
+          />
+        </div>
+        <div v-else class="loading-box">
+          <span>{{ langText.loadingText }}</span>
+        </div>
+        <div class="lounge-key">
+          <img src="./../assets/logo1.jpg" alt="Lounge Key" />
+        </div>
       </div>
-      <div v-else class="loading-box">
-        <span>{{ langText.loadingText }}</span>
-      </div>
-      <div class="lounge-key">
-        <img src="./../assets/logo1.jpg" alt="Lounge Key" />
-      </div>
-    </div>
 
-    <!-- 二维码倒计时刷新提示（移除按钮loading/动画） -->
-    <div class="qrcode-refresh">
-      <span>{{ langText.qrcodeRefreshTip }} {{ countdown }} {{ langText.secondText }}</span>
-      <el-button
-        size="mini"
-        type="primary"
-        plain
-        @click="manualRefreshQrcode"
-        style="
-            background-color: #333 !important;
-            color: #fff !important;
-            border-color: #333 !important;
-            border-radius: 20px !important;
-            padding: 4px 12px !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-        "
-        >
-            {{ langText.refreshBtn }}
-            <i class="el-icon-refresh" style="margin-left: 4px !important; margin-right: 0 !important;"></i>
-        </el-button>
-    </div>
+      <!-- 二维码倒计时刷新提示（移除按钮loading/动画） -->
+      <div class="qrcode-refresh">
+        <span>{{ langText.qrcodeRefreshTip }} {{ countdown }} {{ langText.secondText }}</span>
+        <el-button
+          size="mini"
+          type="primary"
+          plain
+          @click="manualRefreshQrcode"
+          style="
+              background-color: #333 !important;
+              color: #fff !important;
+              border-color: #333 !important;
+              border-radius: 20px !important;
+              padding: 4px 12px !important;
+              display: inline-flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+          "
+          >
+              {{ langText.refreshBtn }}
+              <i class="el-icon-refresh" style="margin-left: 4px !important; margin-right: 0 !important;"></i>
+          </el-button>
+      </div>
 
-    <div class="info-section">
-      <div class="info-item">
-        <span class="label">{{ langText.nameLabel }}</span>
-        <span class="value">{{ info.name }}</span>
+      <div class="info-section">
+        <div class="info-item">
+          <span class="label">{{ langText.nameLabel }}</span>
+          <span class="value">{{ info.name }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">{{ langText.referenceCodeLabel }}</span>
+          <span class="value code" :class="{ 'code-flash': isRefreshing }">{{ info.referenceCode }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">{{ langText.startDateLabel }}</span>
+          <span class="value">{{ info.date }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">{{ langText.endDateLabel }}</span>
+          <span class="value">{{ info.date }}</span>
+        </div>
       </div>
-      <div class="info-item">
-        <span class="label">{{ langText.referenceCodeLabel }}</span>
-        <span class="value code" :class="{ 'code-flash': isRefreshing }">{{ info.referenceCode }}</span>
-      </div>
-      <div class="info-item">
-        <span class="label">{{ langText.startDateLabel }}</span>
-        <span class="value">{{ info.startDate }}</span>
-      </div>
-      <div class="info-item">
-        <span class="label">{{ langText.endDateLabel }}</span>
-        <span class="value">{{ info.endDate }}</span>
-      </div>
-    </div>
 
-    <div class="notice-section">
-      <h2 class="notice-title">{{ langText.noticeTitle }}</h2>
-      <ul class="notice-list">
-        <li>1. {{ langText.notice1 }}</li>
-        <li class="red">2. {{ langText.notice2 }}</li>
-        <li>3. {{ langText.notice3 }}</li>
-        <li>4. {{ langText.notice4 }}</li>
-        <li>5. {{ langText.notice5 }}</li>
-        <li>6. {{ langText.notice6 }}</li>
-      </ul>
-    </div>
+      <div class="notice-section">
+        <h2 class="notice-title">{{ langText.noticeTitle }}</h2>
+        <ul class="notice-list">
+          <li>1. {{ langText.notice1 }}</li>
+          <li class="red">2. {{ langText.notice2 }}</li>
+          <li>3. {{ langText.notice3 }}</li>
+          <li>4. {{ langText.notice4 }}</li>
+          <li>5. {{ langText.notice5 }}</li>
+          <li>6. {{ langText.notice6 }}</li>
+        </ul>
+      </div>
 
-    <div class="footer-tip">{{ langText.footerTip }} — 101.201.78.140</div>
+      <div class="footer-tip">{{ langText.footerTip }} — 101.201.78.140</div>
+    </template>
   </div>
 </template>
 
 <script>
 import QRCode from 'qrcode'
+import { getTrip } from '@/api/trip';
 
 export default {
   name: 'VipLoungePage',
@@ -175,14 +181,14 @@ export default {
     }
   },
   mounted () {
-    const userId = this.$route.query.userId
+    const userId = this.$route.query.tripId
     if (userId) {
       this.loadUserInfo(userId)
+      this.info.referenceCode = this.generateReferenceCode()
+      this.startCountdown()
     } else {
-      this.$message.warning(this.langText.userNotFound)
+      // this.$message.warning(this.langText.userNotFound)
     }
-    this.info.referenceCode = this.generateReferenceCode()
-    this.startCountdown()
   },
   beforeDestroy () {
     if (this.countdownTimer) {
@@ -190,17 +196,32 @@ export default {
     }
   },
   methods: {
-    loadUserInfo (userId) {
-      const userDataList = JSON.parse(localStorage.getItem('userTripData') || '[]')
-      const targetUser = userDataList.find(item => item.userId === userId)
-      if (targetUser) {
-        this.info.name = targetUser.name || ''
-        this.info.startDate = targetUser.date || ''
-        this.info.endDate = targetUser.date || ''
-        this.qrContent = targetUser.qrcodeContent || ''
-        this.qrcodeUrl = targetUser.generatedQrcodeBase64 || ''
-      } else {
-        this.$message.error(this.langText.userNotFound)
+    async loadUserInfo (userId, flag) {
+      try {
+        const res = await getTrip(userId);
+        if (res.data.code === 200) {
+          this.info = res.data.data;
+          if(!flag){
+            // 验证行程是否有效
+            if (this.info.status !== 1) {
+              // this.$message.error('该行程已被禁用！');
+              return
+            }
+            this.qrContent = res.data.data.qrcode_content || ''
+            this.qrcodeUrl = res.data.data.qrcode_base64 || ''
+          }else{
+            this.info.status = res.data.data.status;
+            if (this.info.status !== 1) {
+              if (this.countdownTimer) {
+                clearInterval(this.countdownTimer)
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error('查询失败：', err);
+        // this.$message.error('获取行程数据失败！');
+        // this.$message.error(this.langText.userNotFound)
       }
     },
     generateReferenceCode () {
@@ -221,7 +242,8 @@ export default {
       this.countdownTimer = setInterval(() => {
         this.countdown--
         if (this.countdown <= 0) {
-          this.autoRefreshQrcode()
+          this.loadUserInfo(this.info.id, "check");
+          this.autoRefreshQrcode();
         }
       }, 1000)
     },
@@ -268,10 +290,10 @@ export default {
         this.info.referenceCode = this.generateReferenceCode()
         if (this.qrContent) await this.regenerateQrcode()
         this.refreshTimestamp = Date.now()
-        this.$message.success(this.langText.refreshSuccess)
+        // this.$message.success(this.langText.refreshSuccess)
         this.startCountdown()
       } catch (err) {
-        this.$message.error('刷新失败')
+        // this.$message.error('刷新失败')
       } finally {
         setTimeout(() => { this.isRefreshing = false }, 300)
       }

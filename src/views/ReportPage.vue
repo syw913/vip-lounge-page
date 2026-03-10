@@ -28,7 +28,6 @@
         <el-button
           type="danger"
           size="small"
-          icon="el-icon-delete"
           @click="changeStatus"
           :disabled="!selectedRows.length"
           style="border-radius: 20px;"
@@ -38,9 +37,7 @@
         <el-button
           type="danger"
           size="small"
-          icon="el-icon-delete"
           @click="getTripList"
-          :disabled="!selectedRows.length"
           style="border-radius: 20px;"
         >
           刷新页面
